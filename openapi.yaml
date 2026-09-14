@@ -1,0 +1,883 @@
+openapi: 3.0.3
+info:
+  title: Provenara
+  version: 0.1.0
+  description: >-
+    Art-finance trust and fractional-ownership control plane for provenance, custody, screening, and share registers.
+  x-product-slug: ai-fin-provenara
+  x-source: ai-in-financial/deloitte-lu-art-finance-conf-presentation-2018/
+servers:
+  - url: https://api.example.com
+tags:
+  - name: Artworks
+    description: Artwork trust files
+  - name: Provenance
+    description: Append-only provenance events
+  - name: Custody
+    description: Physical custody attestations
+  - name: Counterparties
+    description: AML name screening
+  - name: Valuations
+    description: Valuation marks and expiry
+  - name: Shares
+    description: Fractional share register
+  - name: Alerts
+    description: Risk alerts
+  - name: Audits
+    description: Anchors and audit exports
+paths:
+  /v1/artworks:
+    get:
+      operationId: listArtworks
+      tags: [Artworks]
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListEnvelopeArtwork"
+    post:
+      operationId: createArtwork
+      tags: [Artworks]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ArtworkCreate"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DataEnvelopeArtwork"
+  /v1/artworks/{artworkId}/trust-file:
+    parameters:
+      - $ref: "#/components/parameters/ArtworkId"
+    get:
+      operationId: getTrustFile
+      tags: [Artworks]
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DataEnvelopeTrustFile"
+  /v1/artworks/{artworkId}/provenance:
+    parameters:
+      - $ref: "#/components/parameters/ArtworkId"
+    get:
+      operationId: listProvenance
+      tags: [Provenance]
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListEnvelopeProvenanceEvent"
+    post:
+      operationId: appendProvenance
+      tags: [Provenance]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProvenanceEventCreate"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DataEnvelopeProvenanceEvent"
+  /v1/artworks/{artworkId}/custody:
+    parameters:
+      - $ref: "#/components/parameters/ArtworkId"
+    post:
+      operationId: attestCustody
+      tags: [Custody]
+      security:
+        - ApiKeyAuth: []
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustodyEventCreate"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DataEnvelopeCustodyEvent"
+  /v1/counterparties:
+    get:
+      operationId: listCounterparties
+      tags: [Counterparties]
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListEnvelopeCounterparty"
+    post:
+      operationId: createCounterparty
+      tags: [Counterparties]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CounterpartyCreate"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DataEnvelopeCounterparty"
+  /v1/counterparties/{counterpartyId}/screen:
+    parameters:
+      - $ref: "#/components/parameters/CounterpartyId"
+    post:
+      operationId: screenCounterparty
+      tags: [Counterparties]
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Screen result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DataEnvelopeScreenResult"
+  /v1/artworks/{artworkId}/valuations:
+    parameters:
+      - $ref: "#/components/parameters/ArtworkId"
+    post:
+      operationId: addValuation
+      tags: [Valuations]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ValuationMarkCreate"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DataEnvelopeValuationMark"
+  /v1/share-classes:
+    get:
+      operationId: listShareClasses
+      tags: [Shares]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: artworkId
+          in: query
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListEnvelopeShareClass"
+    post:
+      operationId: createShareClass
+      tags: [Shares]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShareClassCreate"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DataEnvelopeShareClass"
+  /v1/share-classes/{shareClassId}/subscriptions:
+    parameters:
+      - $ref: "#/components/parameters/ShareClassId"
+    post:
+      operationId: subscribeShares
+      tags: [Shares]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubscriptionCreate"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DataEnvelopeInvestorPosition"
+  /v1/share-classes/{shareClassId}/distributions:
+    parameters:
+      - $ref: "#/components/parameters/ShareClassId"
+    post:
+      operationId: recordDistribution
+      tags: [Shares]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DistributionCreate"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DataEnvelopeDistribution"
+  /v1/alerts:
+    get:
+      operationId: listRiskAlerts
+      tags: [Alerts]
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListEnvelopeRiskAlert"
+  /v1/audits/exports:
+    post:
+      operationId: createProvenaraAuditExport
+      tags: [Audits]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuditExportCreate"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DataEnvelopeAuditExport"
+  /v1/artworks/{artworkId}/anchors:
+    parameters:
+      - $ref: "#/components/parameters/ArtworkId"
+    post:
+      operationId: publishAnchor
+      tags: [Audits]
+      security:
+        - BearerAuth: []
+      responses:
+        "201":
+          description: Anchor receipt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DataEnvelopeAnchorReceipt"
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    Cursor:
+      name: cursor
+      in: query
+      schema: { type: string }
+    Limit:
+      name: limit
+      in: query
+      schema: { type: integer, minimum: 1, maximum: 200, default: 50 }
+
+    ArtworkId:
+      name: artworkId
+      in: path
+      required: true
+      schema: { type: string }
+    CounterpartyId:
+      name: counterpartyId
+      in: path
+      required: true
+      schema: { type: string }
+    ShareClassId:
+      name: shareClassId
+      in: path
+      required: true
+      schema: { type: string }
+
+  responses:
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    NotFound:
+      description: Not found
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    UnprocessableEntity:
+      description: Unprocessable entity
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+  schemas:
+    ResponseMeta:
+      type: object
+      required: [requestId, timestamp]
+      properties:
+        requestId: { type: string }
+        timestamp: { type: string, format: date-time }
+    Problem:
+      type: object
+      required: [type, title, status]
+      properties:
+        type: { type: string, format: uri }
+        title: { type: string }
+        status: { type: integer }
+        detail: { type: string }
+
+    Artwork:
+      type: object
+      required: [id, title]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        artist: { type: string }
+        year: { type: integer }
+    ArtworkCreate:
+      type: object
+      required: [title]
+      properties:
+        title: { type: string }
+        artist: { type: string }
+        year: { type: integer }
+    TrustFile:
+      type: object
+      required: [artworkId, complete]
+      properties:
+        artworkId: { type: string }
+        complete: { type: boolean }
+        titleStatus: { type: string }
+        insuranceStatus: { type: string }
+        mismatchOpen: { type: boolean }
+    ProvenanceEvent:
+      type: object
+      required: [id, artworkId, summary]
+      properties:
+        id: { type: string }
+        artworkId: { type: string }
+        summary: { type: string }
+        documentHash: { type: string }
+        occurredOn: { type: string, format: date }
+    ProvenanceEventCreate:
+      type: object
+      required: [summary]
+      properties:
+        summary: { type: string }
+        documentHash: { type: string }
+        documentUri: { type: string, format: uri }
+        occurredOn: { type: string, format: date }
+    CustodyEvent:
+      type: object
+      required: [id, artworkId, eventType]
+      properties:
+        id: { type: string }
+        artworkId: { type: string }
+        eventType: { type: string, enum: [intake, inspection, shipment, release] }
+        locationClassified: { type: boolean }
+        physicalBindingAttested: { type: boolean }
+    CustodyEventCreate:
+      type: object
+      required: [eventType]
+      properties:
+        eventType: { type: string, enum: [intake, inspection, shipment, release] }
+        physicalBindingAttested: { type: boolean }
+        notes: { type: string }
+    Counterparty:
+      type: object
+      required: [id, name, role]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        role: { type: string, enum: [seller, borrower, investor, custodian, insurer] }
+    CounterpartyCreate:
+      type: object
+      required: [name, role]
+      properties:
+        name: { type: string }
+        role: { type: string, enum: [seller, borrower, investor, custodian, insurer] }
+    ScreenResult:
+      type: object
+      required: [counterpartyId, outcome]
+      properties:
+        counterpartyId: { type: string }
+        outcome: { type: string, enum: [clear, hit, error] }
+        screenedAt: { type: string, format: date-time }
+    ValuationMark:
+      type: object
+      required: [id, artworkId, amount, currency, valuedOn]
+      properties:
+        id: { type: string }
+        artworkId: { type: string }
+        amount: { type: number }
+        currency: { type: string }
+        valuedOn: { type: string, format: date }
+        expiresOn: { type: string, format: date }
+        method: { type: string }
+        valuer: { type: string }
+    ValuationMarkCreate:
+      type: object
+      required: [amount, currency, valuedOn, method, valuer]
+      properties:
+        amount: { type: number }
+        currency: { type: string }
+        valuedOn: { type: string, format: date }
+        expiresOn: { type: string, format: date }
+        method: { type: string }
+        valuer: { type: string }
+    ShareClass:
+      type: object
+      required: [id, artworkId, name]
+      properties:
+        id: { type: string }
+        artworkId: { type: string }
+        name: { type: string }
+        totalShares: { type: number }
+        status: { type: string, enum: [draft, open, closed] }
+    ShareClassCreate:
+      type: object
+      required: [artworkId, name, totalShares]
+      properties:
+        artworkId: { type: string }
+        name: { type: string }
+        totalShares: { type: number }
+        eligibilityPolicy: { type: string }
+    InvestorPosition:
+      type: object
+      required: [id, shareClassId, investorId, shares]
+      properties:
+        id: { type: string }
+        shareClassId: { type: string }
+        investorId: { type: string }
+        shares: { type: number }
+    SubscriptionCreate:
+      type: object
+      required: [investorId, shares]
+      properties:
+        investorId: { type: string }
+        shares: { type: number }
+    Distribution:
+      type: object
+      required: [id, shareClassId, amount]
+      properties:
+        id: { type: string }
+        shareClassId: { type: string }
+        amount: { type: number }
+        currency: { type: string }
+        distributedOn: { type: string, format: date }
+    DistributionCreate:
+      type: object
+      required: [amount, currency]
+      properties:
+        amount: { type: number }
+        currency: { type: string }
+        memo: { type: string }
+    RiskAlert:
+      type: object
+      required: [id, alertType, status]
+      properties:
+        id: { type: string }
+        artworkId: { type: string }
+        alertType: { type: string, enum: [mismatch, valuationExpired, insuranceLapse, cashflowAnomaly] }
+        status: { type: string, enum: [open, resolved] }
+    AnchorReceipt:
+      type: object
+      required: [id, artworkId, contentHash]
+      properties:
+        id: { type: string }
+        artworkId: { type: string }
+        contentHash: { type: string }
+        anchoredAt: { type: string, format: date-time }
+    AuditExport:
+      type: object
+      required: [id, status]
+      properties:
+        id: { type: string }
+        status: { type: string, enum: [pending, ready, failed] }
+        downloadUri: { type: string, format: uri }
+    AuditExportCreate:
+      type: object
+      required: [periodFrom, periodTo]
+      properties:
+        periodFrom: { type: string, format: date-time }
+        periodTo: { type: string, format: date-time }
+
+    DataEnvelopeArtwork:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          $ref: "#/components/schemas/Artwork"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+    ListEnvelopeArtwork:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/Artwork"
+            nextCursor: { type: string }
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+
+    DataEnvelopeTrustFile:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          $ref: "#/components/schemas/TrustFile"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+    ListEnvelopeTrustFile:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/TrustFile"
+            nextCursor: { type: string }
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+
+    DataEnvelopeProvenanceEvent:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          $ref: "#/components/schemas/ProvenanceEvent"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+    ListEnvelopeProvenanceEvent:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/ProvenanceEvent"
+            nextCursor: { type: string }
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+
+    DataEnvelopeCustodyEvent:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          $ref: "#/components/schemas/CustodyEvent"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+    ListEnvelopeCustodyEvent:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/CustodyEvent"
+            nextCursor: { type: string }
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+
+    DataEnvelopeCounterparty:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          $ref: "#/components/schemas/Counterparty"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+    ListEnvelopeCounterparty:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/Counterparty"
+            nextCursor: { type: string }
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+
+    DataEnvelopeScreenResult:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          $ref: "#/components/schemas/ScreenResult"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+    ListEnvelopeScreenResult:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/ScreenResult"
+            nextCursor: { type: string }
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+
+    DataEnvelopeValuationMark:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          $ref: "#/components/schemas/ValuationMark"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+    ListEnvelopeValuationMark:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/ValuationMark"
+            nextCursor: { type: string }
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+
+    DataEnvelopeShareClass:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          $ref: "#/components/schemas/ShareClass"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+    ListEnvelopeShareClass:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/ShareClass"
+            nextCursor: { type: string }
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+
+    DataEnvelopeInvestorPosition:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          $ref: "#/components/schemas/InvestorPosition"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+    ListEnvelopeInvestorPosition:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/InvestorPosition"
+            nextCursor: { type: string }
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+
+    DataEnvelopeDistribution:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          $ref: "#/components/schemas/Distribution"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+    ListEnvelopeDistribution:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/Distribution"
+            nextCursor: { type: string }
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+
+    DataEnvelopeRiskAlert:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          $ref: "#/components/schemas/RiskAlert"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+    ListEnvelopeRiskAlert:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/RiskAlert"
+            nextCursor: { type: string }
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+
+    DataEnvelopeAnchorReceipt:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          $ref: "#/components/schemas/AnchorReceipt"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+    ListEnvelopeAnchorReceipt:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/AnchorReceipt"
+            nextCursor: { type: string }
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+
+    DataEnvelopeAuditExport:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          $ref: "#/components/schemas/AuditExport"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+    ListEnvelopeAuditExport:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/AuditExport"
+            nextCursor: { type: string }
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+
