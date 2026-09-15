@@ -1,0 +1,98 @@
+openapi: 3.1.0
+info:
+  title: Custody schemas
+  version: 0.1.0
+paths: {}
+components:
+  schemas:
+    CustodyEventId:
+      type: string
+      pattern: '^cus_[0-9A-HJKMNP-TV-Z]{26}$'
+    CustodyEventType:
+      type: string
+      enum: [intake, inspection, shipment, release, mismatchFlag, mismatchClear]
+    CustodyEvent:
+      type: object
+      required: [id, tenantId, artworkId, eventType, createdAt, updatedAt]
+      x-dynamodb:
+        domain: CUSTODY
+        entityType: CUSTODY_EVENT
+        entityTypePk: CUSTODY_EVENTS
+        pkPattern: entity
+        tableType: core
+        softDeleteEnabled: false
+        createdAtField: createdAt
+        updatedAtField: updatedAt
+        gsi2Enabled: true
+        gsi2PKFields: [tenantId]
+        gsi2SKFields: [updatedAt]
+      properties:
+        id:
+          $ref: '#/components/schemas/CustodyEventId'
+        tenantId:
+          $ref: ./common/primitives.yaml#/components/schemas/TenantId
+        artworkId:
+          type: string
+        eventType:
+          $ref: '#/components/schemas/CustodyEventType'
+        locationClassified:
+          type: boolean
+        physicalBindingAttested:
+          type: boolean
+        mismatchOpen:
+          type: boolean
+        notes:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    CustodyEventCreate:
+      type: object
+      required: [eventType]
+      properties:
+        eventType:
+          type: string
+          enum: [intake, inspection, shipment, release]
+        physicalBindingAttested:
+          type: boolean
+        notes:
+          type: string
+    MismatchFlagCreate:
+      type: object
+      required: [reason]
+      properties:
+        reason:
+          type: string
+    MismatchClearCreate:
+      type: object
+      required: [reason]
+      properties:
+        reason:
+          type: string
+    CustodyEventResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/CustodyEvent'
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta
+    CustodyEventListResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/CustodyEvent'
+            nextCursor:
+              type: string
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta

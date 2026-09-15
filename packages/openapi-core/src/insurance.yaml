@@ -1,0 +1,95 @@
+openapi: 3.1.0
+info:
+  title: Provenara Insurance API
+  version: 0.1.0
+  description: Insurance policy bind and lapse status.
+  x-domain: ins
+  x-domain-prefix: INS
+  license:
+    name: Proprietary
+servers:
+  - url: https://api.provenara.local
+security:
+  - bearerAuth: []
+  - apiKey: []
+tags:
+  - name: Insurance
+paths:
+  /v1/artworks/{artworkId}/insurance:
+    parameters:
+      - name: artworkId
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      operationId: listInsurancePolicies
+      summary: List Insurance Policies
+      tags: [Insurance]
+      x-repository: InsurancePolicy
+      parameters:
+        - $ref: ./common/parameters.yaml#/components/parameters/Cursor
+        - $ref: ./common/parameters.yaml#/components/parameters/Limit
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: ./insurance.schemas.yaml#/components/schemas/InsurancePolicyListResponse
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+    post:
+      operationId: bindInsurancePolicy
+      summary: Bind Insurance Policy
+      tags: [Insurance]
+      x-repository: InsurancePolicy
+      parameters:
+        - $ref: ./common/parameters.yaml#/components/parameters/IdempotencyKey
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./insurance.schemas.yaml#/components/schemas/InsurancePolicyCreate
+      responses:
+        '201':
+          description: Bound
+          content:
+            application/json:
+              schema:
+                $ref: ./insurance.schemas.yaml#/components/schemas/InsurancePolicyResponse
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+  /v1/artworks/{artworkId}/insurance/{policyId}/lapse:
+    parameters:
+      - name: artworkId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: policyId
+        in: path
+        required: true
+        schema:
+          $ref: ./insurance.schemas.yaml#/components/schemas/InsurancePolicyId
+    post:
+      operationId: lapseInsurancePolicy
+      summary: Mark Insurance Policy Lapsed
+      tags: [Insurance]
+      x-repository: InsurancePolicy
+      responses:
+        '200':
+          description: Lapsed
+          content:
+            application/json:
+              schema:
+                $ref: ./insurance.schemas.yaml#/components/schemas/InsurancePolicyResponse
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+components:
+  securitySchemes:
+    bearerAuth:
+      $ref: ./common/security.yaml#/components/securitySchemes/bearerAuth
+    apiKey:
+      $ref: ./common/security.yaml#/components/securitySchemes/apiKey

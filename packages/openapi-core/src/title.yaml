@@ -1,0 +1,139 @@
+openapi: 3.1.0
+info:
+  title: Provenara Title API
+  version: 0.1.0
+  description: Title status and encumbrance register.
+  x-domain: ttl
+  x-domain-prefix: TTL
+  license:
+    name: Proprietary
+servers:
+  - url: https://api.provenara.local
+security:
+  - bearerAuth: []
+  - apiKey: []
+tags:
+  - name: Title
+  - name: Encumbrances
+paths:
+  /v1/artworks/{artworkId}/title:
+    parameters:
+      - name: artworkId
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      operationId: getTitleStatus
+      summary: Get Title Status
+      tags: [Title]
+      x-repository: TitleStatus
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: ./title.schemas.yaml#/components/schemas/TitleStatusResponse
+        '404':
+          $ref: ./common/responses.yaml#/components/responses/NotFound
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+    put:
+      operationId: upsertTitleStatus
+      summary: Upsert Title Status
+      tags: [Title]
+      x-repository: TitleStatus
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./title.schemas.yaml#/components/schemas/TitleStatusUpsert
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: ./title.schemas.yaml#/components/schemas/TitleStatusResponse
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+  /v1/artworks/{artworkId}/encumbrances:
+    parameters:
+      - name: artworkId
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      operationId: listEncumbrances
+      summary: List Encumbrances
+      tags: [Encumbrances]
+      x-repository: Encumbrance
+      parameters:
+        - $ref: ./common/parameters.yaml#/components/parameters/Cursor
+        - $ref: ./common/parameters.yaml#/components/parameters/Limit
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: ./title.schemas.yaml#/components/schemas/EncumbranceListResponse
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+    post:
+      operationId: recordEncumbrance
+      summary: Record Encumbrance
+      tags: [Encumbrances]
+      x-repository: Encumbrance
+      parameters:
+        - $ref: ./common/parameters.yaml#/components/parameters/IdempotencyKey
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./title.schemas.yaml#/components/schemas/EncumbranceCreate
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: ./title.schemas.yaml#/components/schemas/EncumbranceResponse
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+  /v1/artworks/{artworkId}/encumbrances/{encumbranceId}/release:
+    parameters:
+      - name: artworkId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: encumbranceId
+        in: path
+        required: true
+        schema:
+          $ref: ./title.schemas.yaml#/components/schemas/EncumbranceId
+    post:
+      operationId: releaseEncumbrance
+      summary: Release Encumbrance
+      tags: [Encumbrances]
+      x-repository: Encumbrance
+      responses:
+        '200':
+          description: Released
+          content:
+            application/json:
+              schema:
+                $ref: ./title.schemas.yaml#/components/schemas/EncumbranceResponse
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+components:
+  securitySchemes:
+    bearerAuth:
+      $ref: ./common/security.yaml#/components/securitySchemes/bearerAuth
+    apiKey:
+      $ref: ./common/security.yaml#/components/securitySchemes/apiKey

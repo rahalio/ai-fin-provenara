@@ -1,0 +1,151 @@
+openapi: 3.1.0
+info:
+  title: Counterparties schemas
+  version: 0.1.0
+paths: {}
+components:
+  schemas:
+    CounterpartyId:
+      type: string
+      pattern: '^ctp_[0-9A-HJKMNP-TV-Z]{26}$'
+    ScreenResultId:
+      type: string
+      pattern: '^scr_[0-9A-HJKMNP-TV-Z]{26}$'
+    CounterpartyRole:
+      type: string
+      enum: [seller, borrower, investor, custodian, insurer]
+    Counterparty:
+      type: object
+      required: [id, tenantId, name, role, createdAt, updatedAt]
+      x-dynamodb:
+        domain: COUNTERPARTIES
+        entityType: COUNTERPARTY
+        entityTypePk: COUNTERPARTIES
+        pkPattern: entity
+        tableType: core
+        softDeleteEnabled: false
+        createdAtField: createdAt
+        updatedAtField: updatedAt
+        gsi2Enabled: true
+        gsi2PKFields: [tenantId]
+        gsi2SKFields: [updatedAt]
+      properties:
+        id:
+          $ref: '#/components/schemas/CounterpartyId'
+        tenantId:
+          $ref: ./common/primitives.yaml#/components/schemas/TenantId
+        name:
+          type: string
+        role:
+          $ref: '#/components/schemas/CounterpartyRole'
+        lastScreenOutcome:
+          type: string
+          enum: [clear, hit, error, pending]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    CounterpartyCreate:
+      type: object
+      required: [name, role]
+      properties:
+        name:
+          type: string
+        role:
+          $ref: '#/components/schemas/CounterpartyRole'
+    ScreenResult:
+      type: object
+      required: [id, tenantId, counterpartyId, outcome, screenedAt, createdAt, updatedAt]
+      x-dynamodb:
+        domain: COUNTERPARTIES
+        entityType: SCREEN_RESULT
+        entityTypePk: SCREEN_RESULTS
+        pkPattern: entity
+        tableType: core
+        softDeleteEnabled: false
+        createdAtField: createdAt
+        updatedAtField: updatedAt
+        gsi2Enabled: true
+        gsi2PKFields: [tenantId]
+        gsi2SKFields: [updatedAt]
+      properties:
+        id:
+          $ref: '#/components/schemas/ScreenResultId'
+        tenantId:
+          $ref: ./common/primitives.yaml#/components/schemas/TenantId
+        counterpartyId:
+          $ref: '#/components/schemas/CounterpartyId'
+        outcome:
+          type: string
+          enum: [clear, hit, error]
+        screenedAt:
+          type: string
+          format: date-time
+        overridden:
+          type: boolean
+        overrideReason:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    ScreenOverrideCreate:
+      type: object
+      required: [reason, approverRef]
+      properties:
+        reason:
+          type: string
+        approverRef:
+          type: string
+    CounterpartyResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/Counterparty'
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta
+    CounterpartyListResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/Counterparty'
+            nextCursor:
+              type: string
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta
+    ScreenResultResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/ScreenResult'
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta
+    ScreenResultListResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/ScreenResult'
+            nextCursor:
+              type: string
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta

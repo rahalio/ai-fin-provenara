@@ -1,0 +1,164 @@
+openapi: 3.1.0
+info:
+  title: Provenance schemas
+  version: 0.1.0
+paths: {}
+components:
+  schemas:
+    ProvenanceEventId:
+      type: string
+      pattern: '^prv_[0-9A-HJKMNP-TV-Z]{26}$'
+    DocumentArtefactId:
+      type: string
+      pattern: '^doc_[0-9A-HJKMNP-TV-Z]{26}$'
+    ProvenanceEvent:
+      type: object
+      required: [id, tenantId, artworkId, summary, createdAt, updatedAt]
+      x-dynamodb:
+        domain: PROVENANCE
+        entityType: PROVENANCE_EVENT
+        entityTypePk: PROVENANCE_EVENTS
+        pkPattern: entity
+        tableType: core
+        softDeleteEnabled: false
+        createdAtField: createdAt
+        updatedAtField: updatedAt
+        gsi2Enabled: true
+        gsi2PKFields: [tenantId]
+        gsi2SKFields: [updatedAt]
+      properties:
+        id:
+          $ref: '#/components/schemas/ProvenanceEventId'
+        tenantId:
+          $ref: ./common/primitives.yaml#/components/schemas/TenantId
+        artworkId:
+          type: string
+        summary:
+          type: string
+        documentHash:
+          type: string
+        documentArtefactId:
+          $ref: '#/components/schemas/DocumentArtefactId'
+        occurredOn:
+          type: string
+          format: date
+        disputed:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    ProvenanceEventCreate:
+      type: object
+      required: [summary]
+      properties:
+        summary:
+          type: string
+        documentHash:
+          type: string
+        documentUri:
+          type: string
+          format: uri
+        occurredOn:
+          type: string
+          format: date
+    DocumentArtefact:
+      type: object
+      required: [id, tenantId, artworkId, contentHash, createdAt, updatedAt]
+      x-dynamodb:
+        domain: PROVENANCE
+        entityType: DOCUMENT_ARTEFACT
+        entityTypePk: DOCUMENT_ARTEFACTS
+        pkPattern: entity
+        tableType: core
+        softDeleteEnabled: false
+        createdAtField: createdAt
+        updatedAtField: updatedAt
+        gsi2Enabled: true
+        gsi2PKFields: [tenantId]
+        gsi2SKFields: [updatedAt]
+      properties:
+        id:
+          $ref: '#/components/schemas/DocumentArtefactId'
+        tenantId:
+          $ref: ./common/primitives.yaml#/components/schemas/TenantId
+        artworkId:
+          type: string
+        label:
+          type: string
+        contentHash:
+          type: string
+        uri:
+          type: string
+          format: uri
+        linkedEventId:
+          $ref: '#/components/schemas/ProvenanceEventId'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    DocumentArtefactCreate:
+      type: object
+      required: [contentHash]
+      properties:
+        label:
+          type: string
+        contentHash:
+          type: string
+        uri:
+          type: string
+          format: uri
+        linkedEventId:
+          type: string
+    ProvenanceEventResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/ProvenanceEvent'
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta
+    ProvenanceEventListResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/ProvenanceEvent'
+            nextCursor:
+              type: string
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta
+    DocumentArtefactResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/DocumentArtefact'
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta
+    DocumentArtefactListResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/DocumentArtefact'
+            nextCursor:
+              type: string
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta

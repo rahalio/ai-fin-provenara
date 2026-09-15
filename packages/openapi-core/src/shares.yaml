@@ -1,0 +1,241 @@
+openapi: 3.1.0
+info:
+  title: Provenara Shares API
+  version: 0.1.0
+  description: Fractional share register, subscriptions, transfers, and distributions.
+  x-domain: shr
+  x-domain-prefix: SHR
+  license:
+    name: Proprietary
+servers:
+  - url: https://api.provenara.local
+security:
+  - bearerAuth: []
+  - apiKey: []
+tags:
+  - name: Shares
+  - name: Subscriptions
+  - name: Transfers
+  - name: Distributions
+paths:
+  /v1/share-classes:
+    get:
+      operationId: listShareClasses
+      summary: List Share Classes
+      tags: [Shares]
+      x-repository: ShareClass
+      parameters:
+        - $ref: ./common/parameters.yaml#/components/parameters/Cursor
+        - $ref: ./common/parameters.yaml#/components/parameters/Limit
+        - name: artworkId
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: ./shares.schemas.yaml#/components/schemas/ShareClassListResponse
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+    post:
+      operationId: createShareClass
+      summary: Create Share Class
+      tags: [Shares]
+      x-repository: ShareClass
+      parameters:
+        - $ref: ./common/parameters.yaml#/components/parameters/IdempotencyKey
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./shares.schemas.yaml#/components/schemas/ShareClassCreate
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: ./shares.schemas.yaml#/components/schemas/ShareClassResponse
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+  /v1/share-classes/{shareClassId}:
+    parameters:
+      - name: shareClassId
+        in: path
+        required: true
+        schema:
+          $ref: ./shares.schemas.yaml#/components/schemas/ShareClassId
+    get:
+      operationId: getShareClass
+      summary: Get Share Class
+      tags: [Shares]
+      x-repository: ShareClass
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: ./shares.schemas.yaml#/components/schemas/ShareClassResponse
+        '404':
+          $ref: ./common/responses.yaml#/components/responses/NotFound
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+  /v1/share-classes/{shareClassId}/subscriptions:
+    parameters:
+      - name: shareClassId
+        in: path
+        required: true
+        schema:
+          $ref: ./shares.schemas.yaml#/components/schemas/ShareClassId
+    get:
+      operationId: listInvestorPositions
+      summary: List Investor Positions
+      tags: [Subscriptions]
+      x-repository: InvestorPosition
+      parameters:
+        - $ref: ./common/parameters.yaml#/components/parameters/Cursor
+        - $ref: ./common/parameters.yaml#/components/parameters/Limit
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: ./shares.schemas.yaml#/components/schemas/InvestorPositionListResponse
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+    post:
+      operationId: subscribeShares
+      summary: Subscribe Shares
+      tags: [Subscriptions]
+      x-repository: InvestorPosition
+      parameters:
+        - $ref: ./common/parameters.yaml#/components/parameters/IdempotencyKey
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./shares.schemas.yaml#/components/schemas/SubscriptionCreate
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: ./shares.schemas.yaml#/components/schemas/InvestorPositionResponse
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+  /v1/share-classes/{shareClassId}/transfers:
+    parameters:
+      - name: shareClassId
+        in: path
+        required: true
+        schema:
+          $ref: ./shares.schemas.yaml#/components/schemas/ShareClassId
+    post:
+      operationId: transferShares
+      summary: Transfer Shares
+      tags: [Transfers]
+      x-repository: Transfer
+      parameters:
+        - $ref: ./common/parameters.yaml#/components/parameters/IdempotencyKey
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./shares.schemas.yaml#/components/schemas/TransferCreate
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: ./shares.schemas.yaml#/components/schemas/TransferResponse
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+  /v1/share-classes/{shareClassId}/freeze:
+    parameters:
+      - name: shareClassId
+        in: path
+        required: true
+        schema:
+          $ref: ./shares.schemas.yaml#/components/schemas/ShareClassId
+    post:
+      operationId: freezeShareClass
+      summary: Freeze Share Class
+      tags: [Shares]
+      x-repository: ShareClass
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./shares.schemas.yaml#/components/schemas/FreezeCreate
+      responses:
+        '200':
+          description: Frozen
+          content:
+            application/json:
+              schema:
+                $ref: ./shares.schemas.yaml#/components/schemas/ShareClassResponse
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+  /v1/share-classes/{shareClassId}/distributions:
+    parameters:
+      - name: shareClassId
+        in: path
+        required: true
+        schema:
+          $ref: ./shares.schemas.yaml#/components/schemas/ShareClassId
+    get:
+      operationId: listDistributions
+      summary: List Distributions
+      tags: [Distributions]
+      x-repository: Distribution
+      parameters:
+        - $ref: ./common/parameters.yaml#/components/parameters/Cursor
+        - $ref: ./common/parameters.yaml#/components/parameters/Limit
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: ./shares.schemas.yaml#/components/schemas/DistributionListResponse
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+    post:
+      operationId: recordDistribution
+      summary: Record Distribution
+      tags: [Distributions]
+      x-repository: Distribution
+      parameters:
+        - $ref: ./common/parameters.yaml#/components/parameters/IdempotencyKey
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./shares.schemas.yaml#/components/schemas/DistributionCreate
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: ./shares.schemas.yaml#/components/schemas/DistributionResponse
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+components:
+  securitySchemes:
+    bearerAuth:
+      $ref: ./common/security.yaml#/components/securitySchemes/bearerAuth
+    apiKey:
+      $ref: ./common/security.yaml#/components/securitySchemes/apiKey

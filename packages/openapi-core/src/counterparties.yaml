@@ -1,0 +1,140 @@
+openapi: 3.1.0
+info:
+  title: Provenara Counterparties API
+  version: 0.1.0
+  description: Counterparty registry and AML name screening.
+  x-domain: ctp
+  x-domain-prefix: CTP
+  license:
+    name: Proprietary
+servers:
+  - url: https://api.provenara.local
+security:
+  - bearerAuth: []
+  - apiKey: []
+tags:
+  - name: Counterparties
+  - name: Screening
+paths:
+  /v1/counterparties:
+    get:
+      operationId: listCounterparties
+      summary: List Counterparties
+      tags: [Counterparties]
+      x-repository: Counterparty
+      parameters:
+        - $ref: ./common/parameters.yaml#/components/parameters/Cursor
+        - $ref: ./common/parameters.yaml#/components/parameters/Limit
+        - name: role
+          in: query
+          schema:
+            type: string
+            enum: [seller, borrower, investor, custodian, insurer]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: ./counterparties.schemas.yaml#/components/schemas/CounterpartyListResponse
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+    post:
+      operationId: createCounterparty
+      summary: Create Counterparty
+      tags: [Counterparties]
+      x-repository: Counterparty
+      parameters:
+        - $ref: ./common/parameters.yaml#/components/parameters/IdempotencyKey
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./counterparties.schemas.yaml#/components/schemas/CounterpartyCreate
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: ./counterparties.schemas.yaml#/components/schemas/CounterpartyResponse
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+  /v1/counterparties/{counterpartyId}:
+    parameters:
+      - name: counterpartyId
+        in: path
+        required: true
+        schema:
+          $ref: ./counterparties.schemas.yaml#/components/schemas/CounterpartyId
+    get:
+      operationId: getCounterparty
+      summary: Get Counterparty
+      tags: [Counterparties]
+      x-repository: Counterparty
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: ./counterparties.schemas.yaml#/components/schemas/CounterpartyResponse
+        '404':
+          $ref: ./common/responses.yaml#/components/responses/NotFound
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+  /v1/counterparties/{counterpartyId}/screen:
+    parameters:
+      - name: counterpartyId
+        in: path
+        required: true
+        schema:
+          $ref: ./counterparties.schemas.yaml#/components/schemas/CounterpartyId
+    post:
+      operationId: screenCounterparty
+      summary: Screen Counterparty
+      tags: [Screening]
+      x-repository: ScreenResult
+      responses:
+        '200':
+          description: Screen result
+          content:
+            application/json:
+              schema:
+                $ref: ./counterparties.schemas.yaml#/components/schemas/ScreenResultResponse
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+  /v1/counterparties/{counterpartyId}/screen/override:
+    parameters:
+      - name: counterpartyId
+        in: path
+        required: true
+        schema:
+          $ref: ./counterparties.schemas.yaml#/components/schemas/CounterpartyId
+    post:
+      operationId: overrideScreenResult
+      summary: Dual-control Override Screen Result
+      tags: [Screening]
+      x-repository: ScreenResult
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./counterparties.schemas.yaml#/components/schemas/ScreenOverrideCreate
+      responses:
+        '200':
+          description: Overridden
+          content:
+            application/json:
+              schema:
+                $ref: ./counterparties.schemas.yaml#/components/schemas/ScreenResultResponse
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+components:
+  securitySchemes:
+    bearerAuth:
+      $ref: ./common/security.yaml#/components/securitySchemes/bearerAuth
+    apiKey:
+      $ref: ./common/security.yaml#/components/securitySchemes/apiKey

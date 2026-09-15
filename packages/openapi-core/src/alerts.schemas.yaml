@@ -1,0 +1,84 @@
+openapi: 3.1.0
+info:
+  title: Alerts schemas
+  version: 0.1.0
+paths: {}
+components:
+  schemas:
+    RiskAlertId:
+      type: string
+      pattern: '^alt_[0-9A-HJKMNP-TV-Z]{26}$'
+    RiskAlert:
+      type: object
+      required: [id, tenantId, alertType, status, createdAt, updatedAt]
+      x-dynamodb:
+        domain: ALERTS
+        entityType: RISK_ALERT
+        entityTypePk: RISK_ALERTS
+        pkPattern: entity
+        tableType: core
+        softDeleteEnabled: false
+        createdAtField: createdAt
+        updatedAtField: updatedAt
+        gsi2Enabled: true
+        gsi2PKFields: [tenantId]
+        gsi2SKFields: [updatedAt]
+      properties:
+        id:
+          $ref: '#/components/schemas/RiskAlertId'
+        tenantId:
+          $ref: ./common/primitives.yaml#/components/schemas/TenantId
+        artworkId:
+          type: string
+        alertType:
+          type: string
+          enum: [mismatch, valuationExpired, insuranceLapse, cashflowAnomaly]
+        status:
+          type: string
+          enum: [open, assigned, resolved]
+        assigneeRef:
+          type: string
+        resolutionNote:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    AlertAssignCreate:
+      type: object
+      required: [assigneeRef]
+      properties:
+        assigneeRef:
+          type: string
+    AlertResolveCreate:
+      type: object
+      required: [resolutionNote]
+      properties:
+        resolutionNote:
+          type: string
+    RiskAlertResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/RiskAlert'
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta
+    RiskAlertListResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/RiskAlert'
+            nextCursor:
+              type: string
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta

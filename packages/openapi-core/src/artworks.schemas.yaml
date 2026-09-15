@@ -1,0 +1,155 @@
+openapi: 3.1.0
+info:
+  title: Artworks schemas
+  version: 0.1.0
+paths: {}
+components:
+  schemas:
+    ArtworkId:
+      type: string
+      pattern: '^art_[0-9A-HJKMNP-TV-Z]{26}$'
+    TrustFileId:
+      type: string
+      pattern: '^trf_[0-9A-HJKMNP-TV-Z]{26}$'
+    Artwork:
+      type: object
+      required: [id, tenantId, title, createdAt, updatedAt]
+      x-dynamodb:
+        domain: ARTWORKS
+        entityType: ARTWORK
+        entityTypePk: ARTWORKS
+        pkPattern: entity
+        tableType: core
+        softDeleteEnabled: false
+        createdAtField: createdAt
+        updatedAtField: updatedAt
+        gsi2Enabled: true
+        gsi2PKFields: [tenantId]
+        gsi2SKFields: [updatedAt]
+      properties:
+        id:
+          $ref: '#/components/schemas/ArtworkId'
+        tenantId:
+          $ref: ./common/primitives.yaml#/components/schemas/TenantId
+        title:
+          type: string
+        artist:
+          type: string
+        year:
+          type: integer
+        medium:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    ArtworkCreate:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+        artist:
+          type: string
+        year:
+          type: integer
+        medium:
+          type: string
+    TrustFile:
+      type: object
+      required: [id, tenantId, artworkId, complete, mismatchOpen, createdAt, updatedAt]
+      x-dynamodb:
+        domain: ARTWORKS
+        entityType: TRUST_FILE
+        entityTypePk: TRUST_FILES
+        pkPattern: entity
+        tableType: core
+        softDeleteEnabled: false
+        createdAtField: createdAt
+        updatedAtField: updatedAt
+        gsi2Enabled: true
+        gsi2PKFields: [tenantId]
+        gsi2SKFields: [updatedAt]
+      properties:
+        id:
+          $ref: '#/components/schemas/TrustFileId'
+        tenantId:
+          $ref: ./common/primitives.yaml#/components/schemas/TenantId
+        artworkId:
+          $ref: '#/components/schemas/ArtworkId'
+        complete:
+          type: boolean
+        titleStatus:
+          type: string
+          enum: [unknown, clear, encumbered, disputed]
+        insuranceStatus:
+          type: string
+          enum: [unknown, bound, lapsed, uninsured]
+        mismatchOpen:
+          type: boolean
+        provenanceComplete:
+          type: boolean
+        custodyBound:
+          type: boolean
+        valuationCurrent:
+          type: boolean
+        lendable:
+          type: boolean
+        offerReady:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    ArtworkResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/Artwork'
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta
+    ArtworkListResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/Artwork'
+            nextCursor:
+              type: string
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta
+    TrustFileResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/TrustFile'
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta
+    TrustFileListResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/TrustFile'
+            nextCursor:
+              type: string
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta

@@ -1,0 +1,18 @@
+{
+  "name": "@provenara/openapi-core",
+  "version": "0.1.0",
+  "private": true,
+  "description": "OpenAPI contracts for Provenara (common + identity + product domains)",
+  "scripts": {
+    "lint:domains": "redocly lint",
+    "bundle:domains": "mkdir -p src/.bundled && redocly bundle identity --output src/.bundled/identity.openapi.yaml && redocly bundle identity --output src/.bundled/identity.json && redocly bundle artworks --output src/.bundled/artworks.openapi.yaml && redocly bundle artworks --output src/.bundled/artworks.json && redocly bundle provenance --output src/.bundled/provenance.openapi.yaml && redocly bundle provenance --output src/.bundled/provenance.json && redocly bundle custody --output src/.bundled/custody.openapi.yaml && redocly bundle custody --output src/.bundled/custody.json && redocly bundle title --output src/.bundled/title.openapi.yaml && redocly bundle title --output src/.bundled/title.json && redocly bundle counterparties --output src/.bundled/counterparties.openapi.yaml && redocly bundle counterparties --output src/.bundled/counterparties.json && redocly bundle valuations --output src/.bundled/valuations.openapi.yaml && redocly bundle valuations --output src/.bundled/valuations.json && redocly bundle insurance --output src/.bundled/insurance.openapi.yaml && redocly bundle insurance --output src/.bundled/insurance.json && redocly bundle shares --output src/.bundled/shares.openapi.yaml && redocly bundle shares --output src/.bundled/shares.json && redocly bundle alerts --output src/.bundled/alerts.openapi.yaml && redocly bundle alerts --output src/.bundled/alerts.json && redocly bundle audits --output src/.bundled/audits.openapi.yaml && redocly bundle audits --output src/.bundled/audits.json",
+    "lint": "pnpm run lint:domains",
+    "bundle": "pnpm run bundle:domains"
+  },
+  "devDependencies": {
+    "@redocly/cli": "^1.34.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -1,0 +1,128 @@
+openapi: 3.1.0
+info:
+  title: Provenara Alerts API
+  version: 0.1.0
+  description: Risk alerts queue with assign and resolve.
+  x-domain: alt
+  x-domain-prefix: ALT
+  license:
+    name: Proprietary
+servers:
+  - url: https://api.provenara.local
+security:
+  - bearerAuth: []
+  - apiKey: []
+tags:
+  - name: Alerts
+paths:
+  /v1/alerts:
+    get:
+      operationId: listRiskAlerts
+      summary: List Risk Alerts
+      tags: [Alerts]
+      x-repository: RiskAlert
+      parameters:
+        - $ref: ./common/parameters.yaml#/components/parameters/Cursor
+        - $ref: ./common/parameters.yaml#/components/parameters/Limit
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [open, assigned, resolved]
+        - name: alertType
+          in: query
+          schema:
+            type: string
+            enum: [mismatch, valuationExpired, insuranceLapse, cashflowAnomaly]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: ./alerts.schemas.yaml#/components/schemas/RiskAlertListResponse
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+  /v1/alerts/{alertId}:
+    parameters:
+      - name: alertId
+        in: path
+        required: true
+        schema:
+          $ref: ./alerts.schemas.yaml#/components/schemas/RiskAlertId
+    get:
+      operationId: getRiskAlert
+      summary: Get Risk Alert
+      tags: [Alerts]
+      x-repository: RiskAlert
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: ./alerts.schemas.yaml#/components/schemas/RiskAlertResponse
+        '404':
+          $ref: ./common/responses.yaml#/components/responses/NotFound
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+  /v1/alerts/{alertId}/assign:
+    parameters:
+      - name: alertId
+        in: path
+        required: true
+        schema:
+          $ref: ./alerts.schemas.yaml#/components/schemas/RiskAlertId
+    post:
+      operationId: assignRiskAlert
+      summary: Assign Risk Alert
+      tags: [Alerts]
+      x-repository: RiskAlert
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./alerts.schemas.yaml#/components/schemas/AlertAssignCreate
+      responses:
+        '200':
+          description: Assigned
+          content:
+            application/json:
+              schema:
+                $ref: ./alerts.schemas.yaml#/components/schemas/RiskAlertResponse
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+  /v1/alerts/{alertId}/resolve:
+    parameters:
+      - name: alertId
+        in: path
+        required: true
+        schema:
+          $ref: ./alerts.schemas.yaml#/components/schemas/RiskAlertId
+    post:
+      operationId: resolveRiskAlert
+      summary: Resolve Risk Alert
+      tags: [Alerts]
+      x-repository: RiskAlert
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./alerts.schemas.yaml#/components/schemas/AlertResolveCreate
+      responses:
+        '200':
+          description: Resolved
+          content:
+            application/json:
+              schema:
+                $ref: ./alerts.schemas.yaml#/components/schemas/RiskAlertResponse
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+components:
+  securitySchemes:
+    bearerAuth:
+      $ref: ./common/security.yaml#/components/securitySchemes/bearerAuth
+    apiKey:
+      $ref: ./common/security.yaml#/components/securitySchemes/apiKey

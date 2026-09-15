@@ -1,0 +1,97 @@
+openapi: 3.1.0
+info:
+  title: Insurance schemas
+  version: 0.1.0
+paths: {}
+components:
+  schemas:
+    InsurancePolicyId:
+      type: string
+      pattern: '^ins_[0-9A-HJKMNP-TV-Z]{26}$'
+    InsurancePolicy:
+      type: object
+      required: [id, tenantId, artworkId, status, createdAt, updatedAt]
+      x-dynamodb:
+        domain: INSURANCE
+        entityType: INSURANCE_POLICY
+        entityTypePk: INSURANCE_POLICIES
+        pkPattern: entity
+        tableType: core
+        softDeleteEnabled: false
+        createdAtField: createdAt
+        updatedAtField: updatedAt
+        gsi2Enabled: true
+        gsi2PKFields: [tenantId]
+        gsi2SKFields: [updatedAt]
+      properties:
+        id:
+          $ref: '#/components/schemas/InsurancePolicyId'
+        tenantId:
+          $ref: ./common/primitives.yaml#/components/schemas/TenantId
+        artworkId:
+          type: string
+        insurerRef:
+          type: string
+        policyNumber:
+          type: string
+        status:
+          type: string
+          enum: [bound, lapsed, uninsured]
+        coverageAmount:
+          type: number
+        currency:
+          $ref: ./common/primitives.yaml#/components/schemas/Currency
+        effectiveOn:
+          type: string
+          format: date
+        expiresOn:
+          type: string
+          format: date
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    InsurancePolicyCreate:
+      type: object
+      required: [insurerRef, policyNumber]
+      properties:
+        insurerRef:
+          type: string
+        policyNumber:
+          type: string
+        coverageAmount:
+          type: number
+        currency:
+          $ref: ./common/primitives.yaml#/components/schemas/Currency
+        effectiveOn:
+          type: string
+          format: date
+        expiresOn:
+          type: string
+          format: date
+    InsurancePolicyResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/InsurancePolicy'
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta
+    InsurancePolicyListResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/InsurancePolicy'
+            nextCursor:
+              type: string
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta

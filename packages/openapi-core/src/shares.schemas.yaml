@@ -1,0 +1,304 @@
+openapi: 3.1.0
+info:
+  title: Shares schemas
+  version: 0.1.0
+paths: {}
+components:
+  schemas:
+    ShareClassId:
+      type: string
+      pattern: '^shr_[0-9A-HJKMNP-TV-Z]{26}$'
+    InvestorPositionId:
+      type: string
+      pattern: '^pos_[0-9A-HJKMNP-TV-Z]{26}$'
+    TransferId:
+      type: string
+      pattern: '^xfr_[0-9A-HJKMNP-TV-Z]{26}$'
+    DistributionId:
+      type: string
+      pattern: '^dst_[0-9A-HJKMNP-TV-Z]{26}$'
+    ShareClass:
+      type: object
+      required: [id, tenantId, artworkId, name, totalShares, status, createdAt, updatedAt]
+      x-dynamodb:
+        domain: SHARES
+        entityType: SHARE_CLASS
+        entityTypePk: SHARE_CLASSES
+        pkPattern: entity
+        tableType: core
+        softDeleteEnabled: false
+        createdAtField: createdAt
+        updatedAtField: updatedAt
+        gsi2Enabled: true
+        gsi2PKFields: [tenantId]
+        gsi2SKFields: [updatedAt]
+      properties:
+        id:
+          $ref: '#/components/schemas/ShareClassId'
+        tenantId:
+          $ref: ./common/primitives.yaml#/components/schemas/TenantId
+        artworkId:
+          type: string
+        name:
+          type: string
+        totalShares:
+          type: number
+        status:
+          type: string
+          enum: [draft, open, closed, frozen]
+        eligibilityPolicy:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    ShareClassCreate:
+      type: object
+      required: [artworkId, name, totalShares]
+      properties:
+        artworkId:
+          type: string
+        name:
+          type: string
+        totalShares:
+          type: number
+        eligibilityPolicy:
+          type: string
+    InvestorPosition:
+      type: object
+      required: [id, tenantId, shareClassId, investorId, shares, createdAt, updatedAt]
+      x-dynamodb:
+        domain: SHARES
+        entityType: INVESTOR_POSITION
+        entityTypePk: INVESTOR_POSITIONS
+        pkPattern: entity
+        tableType: core
+        softDeleteEnabled: false
+        createdAtField: createdAt
+        updatedAtField: updatedAt
+        gsi2Enabled: true
+        gsi2PKFields: [tenantId]
+        gsi2SKFields: [updatedAt]
+      properties:
+        id:
+          $ref: '#/components/schemas/InvestorPositionId'
+        tenantId:
+          $ref: ./common/primitives.yaml#/components/schemas/TenantId
+        shareClassId:
+          $ref: '#/components/schemas/ShareClassId'
+        investorId:
+          type: string
+        shares:
+          type: number
+        lockupUntil:
+          type: string
+          format: date
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    SubscriptionCreate:
+      type: object
+      required: [investorId, shares]
+      properties:
+        investorId:
+          type: string
+        shares:
+          type: number
+    Transfer:
+      type: object
+      required: [id, tenantId, shareClassId, fromInvestorId, toInvestorId, shares, createdAt, updatedAt]
+      x-dynamodb:
+        domain: SHARES
+        entityType: TRANSFER
+        entityTypePk: TRANSFERS
+        pkPattern: entity
+        tableType: core
+        softDeleteEnabled: false
+        createdAtField: createdAt
+        updatedAtField: updatedAt
+        gsi2Enabled: true
+        gsi2PKFields: [tenantId]
+        gsi2SKFields: [updatedAt]
+      properties:
+        id:
+          $ref: '#/components/schemas/TransferId'
+        tenantId:
+          $ref: ./common/primitives.yaml#/components/schemas/TenantId
+        shareClassId:
+          $ref: '#/components/schemas/ShareClassId'
+        fromInvestorId:
+          type: string
+        toInvestorId:
+          type: string
+        shares:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    TransferCreate:
+      type: object
+      required: [fromInvestorId, toInvestorId, shares]
+      properties:
+        fromInvestorId:
+          type: string
+        toInvestorId:
+          type: string
+        shares:
+          type: number
+    FreezeCreate:
+      type: object
+      required: [reason]
+      properties:
+        reason:
+          type: string
+    Distribution:
+      type: object
+      required: [id, tenantId, shareClassId, amount, currency, createdAt, updatedAt]
+      x-dynamodb:
+        domain: SHARES
+        entityType: DISTRIBUTION
+        entityTypePk: DISTRIBUTIONS
+        pkPattern: entity
+        tableType: core
+        softDeleteEnabled: false
+        createdAtField: createdAt
+        updatedAtField: updatedAt
+        gsi2Enabled: true
+        gsi2PKFields: [tenantId]
+        gsi2SKFields: [updatedAt]
+      properties:
+        id:
+          $ref: '#/components/schemas/DistributionId'
+        tenantId:
+          $ref: ./common/primitives.yaml#/components/schemas/TenantId
+        shareClassId:
+          $ref: '#/components/schemas/ShareClassId'
+        amount:
+          type: number
+        currency:
+          $ref: ./common/primitives.yaml#/components/schemas/Currency
+        distributedOn:
+          type: string
+          format: date
+        memo:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    DistributionCreate:
+      type: object
+      required: [amount, currency]
+      properties:
+        amount:
+          type: number
+        currency:
+          $ref: ./common/primitives.yaml#/components/schemas/Currency
+        memo:
+          type: string
+    ShareClassResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/ShareClass'
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta
+    ShareClassListResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/ShareClass'
+            nextCursor:
+              type: string
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta
+    InvestorPositionResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/InvestorPosition'
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta
+    InvestorPositionListResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/InvestorPosition'
+            nextCursor:
+              type: string
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta
+    TransferResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/Transfer'
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta
+    TransferListResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/Transfer'
+            nextCursor:
+              type: string
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta
+    DistributionResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/Distribution'
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta
+    DistributionListResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/Distribution'
+            nextCursor:
+              type: string
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta

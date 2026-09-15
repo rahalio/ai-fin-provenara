@@ -1,0 +1,154 @@
+openapi: 3.1.0
+info:
+  title: Title schemas
+  version: 0.1.0
+paths: {}
+components:
+  schemas:
+    TitleStatusId:
+      type: string
+      pattern: '^ttl_[0-9A-HJKMNP-TV-Z]{26}$'
+    EncumbranceId:
+      type: string
+      pattern: '^enc_[0-9A-HJKMNP-TV-Z]{26}$'
+    TitleStatus:
+      type: object
+      required: [id, tenantId, artworkId, status, createdAt, updatedAt]
+      x-dynamodb:
+        domain: TITLE
+        entityType: TITLE_STATUS
+        entityTypePk: TITLE_STATUSES
+        pkPattern: entity
+        tableType: core
+        softDeleteEnabled: false
+        createdAtField: createdAt
+        updatedAtField: updatedAt
+        gsi2Enabled: true
+        gsi2PKFields: [tenantId]
+        gsi2SKFields: [updatedAt]
+      properties:
+        id:
+          $ref: '#/components/schemas/TitleStatusId'
+        tenantId:
+          $ref: ./common/primitives.yaml#/components/schemas/TenantId
+        artworkId:
+          type: string
+        status:
+          type: string
+          enum: [unknown, clear, encumbered, disputed]
+        notes:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    TitleStatusUpsert:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [unknown, clear, encumbered, disputed]
+        notes:
+          type: string
+    Encumbrance:
+      type: object
+      required: [id, tenantId, artworkId, holderRef, status, createdAt, updatedAt]
+      x-dynamodb:
+        domain: TITLE
+        entityType: ENCUMBRANCE
+        entityTypePk: ENCUMBRANCES
+        pkPattern: entity
+        tableType: core
+        softDeleteEnabled: false
+        createdAtField: createdAt
+        updatedAtField: updatedAt
+        gsi2Enabled: true
+        gsi2PKFields: [tenantId]
+        gsi2SKFields: [updatedAt]
+      properties:
+        id:
+          $ref: '#/components/schemas/EncumbranceId'
+        tenantId:
+          $ref: ./common/primitives.yaml#/components/schemas/TenantId
+        artworkId:
+          type: string
+        holderRef:
+          type: string
+        status:
+          type: string
+          enum: [active, released]
+        collateralType:
+          type: string
+        amount:
+          type: number
+        currency:
+          $ref: ./common/primitives.yaml#/components/schemas/Currency
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    EncumbranceCreate:
+      type: object
+      required: [holderRef]
+      properties:
+        holderRef:
+          type: string
+        collateralType:
+          type: string
+        amount:
+          type: number
+        currency:
+          $ref: ./common/primitives.yaml#/components/schemas/Currency
+    TitleStatusResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/TitleStatus'
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta
+    TitleStatusListResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/TitleStatus'
+            nextCursor:
+              type: string
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta
+    EncumbranceResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/Encumbrance'
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta
+    EncumbranceListResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/Encumbrance'
+            nextCursor:
+              type: string
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta

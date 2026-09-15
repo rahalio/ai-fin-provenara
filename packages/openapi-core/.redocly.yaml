@@ -1,0 +1,40 @@
+apis:
+  identity:
+    root: src/identity.yaml
+  artworks:
+    root: src/artworks.yaml
+  provenance:
+    root: src/provenance.yaml
+  custody:
+    root: src/custody.yaml
+  title:
+    root: src/title.yaml
+  counterparties:
+    root: src/counterparties.yaml
+  valuations:
+    root: src/valuations.yaml
+  insurance:
+    root: src/insurance.yaml
+  shares:
+    root: src/shares.yaml
+  alerts:
+    root: src/alerts.yaml
+  audits:
+    root: src/audits.yaml
+
+extends:
+  - recommended
+
+rules:
+  no-unused-components: off
+  operation-4xx-response: warn
+  info-license: off
+  info-license-url: off
+  tag-description: off
+  operation-operationId: error
+  no-invalid-media-type-examples: off
+
+theme:
+  openapi:
+    generateCodeSamples:
+      languages: []

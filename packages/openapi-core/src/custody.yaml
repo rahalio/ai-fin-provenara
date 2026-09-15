@@ -1,0 +1,116 @@
+openapi: 3.1.0
+info:
+  title: Provenara Custody API
+  version: 0.1.0
+  description: Physical custody attestations and mismatch adjudication.
+  x-domain: cus
+  x-domain-prefix: CUS
+  license:
+    name: Proprietary
+servers:
+  - url: https://api.provenara.local
+security:
+  - bearerAuth: []
+  - apiKey: []
+tags:
+  - name: Custody
+paths:
+  /v1/artworks/{artworkId}/custody:
+    parameters:
+      - name: artworkId
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      operationId: listCustodyEvents
+      summary: List Custody Events
+      tags: [Custody]
+      x-repository: CustodyEvent
+      parameters:
+        - $ref: ./common/parameters.yaml#/components/parameters/Cursor
+        - $ref: ./common/parameters.yaml#/components/parameters/Limit
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: ./custody.schemas.yaml#/components/schemas/CustodyEventListResponse
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+    post:
+      operationId: attestCustody
+      summary: Attest Custody Event
+      tags: [Custody]
+      x-repository: CustodyEvent
+      parameters:
+        - $ref: ./common/parameters.yaml#/components/parameters/IdempotencyKey
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./custody.schemas.yaml#/components/schemas/CustodyEventCreate
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: ./custody.schemas.yaml#/components/schemas/CustodyEventResponse
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+  /v1/artworks/{artworkId}/custody/mismatch:
+    parameters:
+      - name: artworkId
+        in: path
+        required: true
+        schema:
+          type: string
+    post:
+      operationId: flagCustodyMismatch
+      summary: Flag Custody Mismatch
+      tags: [Custody]
+      x-repository: CustodyEvent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./custody.schemas.yaml#/components/schemas/MismatchFlagCreate
+      responses:
+        '201':
+          description: Flagged
+          content:
+            application/json:
+              schema:
+                $ref: ./custody.schemas.yaml#/components/schemas/CustodyEventResponse
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+    delete:
+      operationId: clearCustodyMismatch
+      summary: Clear Custody Mismatch
+      tags: [Custody]
+      x-repository: CustodyEvent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./custody.schemas.yaml#/components/schemas/MismatchClearCreate
+      responses:
+        '200':
+          description: Cleared
+          content:
+            application/json:
+              schema:
+                $ref: ./custody.schemas.yaml#/components/schemas/CustodyEventResponse
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+components:
+  securitySchemes:
+    bearerAuth:
+      $ref: ./common/security.yaml#/components/securitySchemes/bearerAuth
+    apiKey:
+      $ref: ./common/security.yaml#/components/securitySchemes/apiKey
